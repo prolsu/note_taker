@@ -68,6 +68,7 @@ const handleNoteDelete = function (event) {
   event.stopPropagation();
 
   const note = $(this).parent(".list-group-item").data();
+  console.log(`test here =>${note}`)
 
   if (activeNote.id === note.id) {
     activeNote = {};

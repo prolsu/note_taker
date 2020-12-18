@@ -2,7 +2,7 @@ const express = require('express');
 const path = require('path');
 const fs = require('fs');
 
-const dbFile = require('./db/db.json');
+let dbFile = require('./db/db.json');
 
 // Creates the server here...
 const app = express();
@@ -29,41 +29,31 @@ app.get("/api/notes", function (req, res) {
 
 app.post("/api/notes", function (req, res) {
     const newNote = req.body;
-    
     let idNumber = dbFile.length;
         
     newNote["id"] = JSON.stringify(idNumber); 
-    console.log(newNote);
+    // console.log(newNote);
     
-    dbFile.unshift(newNote);
+    dbFile.push(newNote);
     res.json(true);
 });
 
-app.delete("/api/notes/:id", function(req, res) {
-    let toDelete = req.params.id;
-    console.log(typeof(toDelete));
+app.delete("/api/notes/:id", (req, res) => {
+    const { id } = req.params;
+
+    const toDelete = dbFile.find(item => item.id === id)
     
-    // console.log(dbFile)
-
-    let filtered = dbFile.filter(x => x != null);
-    
-    for (let  i = 0; i < filtered.length; i++){
-            
-        if(filtered[i].id == toDelete){
-            console.log(typeof(filtered[i].id))
-            delete filtered[i];
-        }
-        }
-
-    const updatedNoteArray = filtered.filter(x => x != null);
-    console.log(updatedNoteArray);
-
-    fs.writeFile('./db/db.json', JSON.stringify(updatedNoteArray), 'utf8', (err) =>
-        err ? console.log(err) : console.log(`Item with id ${toDelete} was deleted.`))
-
-    return res.json(true);
+    if(toDelete) {
+        dbFile = dbFile.filter(item => item.id != id)
+        res.status(200).json(toDelete);
+    }
+    else{
+        res
+            .status(404)
+            .json({message: `Item with id number '${id}' does not exist`});
+    }
+  
 });
-
 
 // * route goes at end...
 app.get("*", function(req, res) {
