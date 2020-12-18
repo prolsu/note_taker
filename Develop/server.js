@@ -2,7 +2,7 @@ const express = require('express');
 const path = require('path');
 const fs = require('fs');
 
-const noteArray = require('./db/db.json');
+const dbFile = require('./db/db.json');
 
 // Creates the server here...
 const app = express();
@@ -20,24 +20,46 @@ app.get("/notes", function (req, res) {
 
 // API Routes
 app.get("/api/notes", function (req, res) {
-    res.json(noteArray);
-    // console.log(noteArray);
-    console.log(noteArray.length);
+    res.json(dbFile);
 });
 
 app.post("/api/notes", function (req, res) {
     const newNote = req.body;
     
-    newNote["id"] = noteArray.length;
+    let idNumber = dbFile.length;
+        
+    newNote["id"] = JSON.stringify(idNumber); 
     console.log(newNote);
     
-    noteArray.push(newNote);
+    dbFile.unshift(newNote);
     res.json(true);
 });
 
-// app.delete("/api/notes/:id", function(req, res) {
-//     res.send("Testing");
-// });
+app.delete("/api/notes/:id", function(req, res) {
+    let toDelete = req.params.id;
+    console.log(typeof(toDelete));
+    
+    // console.log(dbFile)
+
+    let filtered = dbFile.filter(x => x != null);
+    
+    for (let  i = 0; i < filtered.length; i++){
+            
+        if(filtered[i].id == toDelete){
+            console.log(typeof(filtered[i].id))
+            delete filtered[i];
+        }
+        }
+
+    const updatedNoteArray = filtered.filter(x => x != null);
+    console.log(updatedNoteArray);
+
+    fs.writeFile('./db/db.json', JSON.stringify(updatedNoteArray), 'utf8', (err) =>
+        err ? console.log(err) : console.log(`Item with id ${toDelete} was deleted.`))
+
+    return res.json(true);
+});
+
 
 // * route goes at end...
 app.get("*", function(req, res) {
