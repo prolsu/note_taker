@@ -3,6 +3,7 @@ const path = require('path');
 const fs = require('fs');
 
 let dbFile = require('./db/db.json');
+let dbBackUp = require('./db/dbBackUp.json');
 
 // Creates the server here...
 const app = express();
@@ -25,6 +26,10 @@ app.get("/notes", function (req, res) {
 // API Routes
 app.get("/api/notes", function (req, res) {
     res.json(dbFile);
+});
+
+app.get("/api/backup", function (req, res) {
+    res.json(dbBackUp);
 });
 
 app.post("/api/notes", function (req, res) {
@@ -69,6 +74,7 @@ app.delete("/api/notes/:id", (req, res) => {
     const toDelete = dbFile.find(item => item.id === id)
     
     if(toDelete) {
+        dbBackUp.push(dbFile)
         dbFile = dbFile.filter(item => item.id != id)
         res.status(200).json(toDelete);
     }
