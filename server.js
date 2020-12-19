@@ -28,13 +28,38 @@ app.get("/api/notes", function (req, res) {
 });
 
 app.post("/api/notes", function (req, res) {
-    const newNote = req.body;
-    let idNumber = dbFile.length;
-        
-    newNote["id"] = JSON.stringify(idNumber); 
-    // console.log(newNote);
     
-    dbFile.push(newNote);
+    const assignRandomId = () => {
+        let newNote = req.body;
+        let title = newNote.title;
+
+        //dbFileIds array collects all 'IDs' from each object in the array 'dbFile'(notes)
+        let dbFileIds = [];
+        dbFile.forEach(x => dbFileIds.push(x.id));
+        
+        //'identifier' array will collect all letters in the title and remove any empty spaces
+        let identifier = [];
+        for(let i = 0; i < title.length; i++){
+            identifier.push(title.charAt(i));
+        }
+        identifier = identifier.filter(x => x != " "); 
+
+        //'id' will be assigned to each 'note' POSTED to 'dbFile'
+        //it will take each letter from the 'identifier' array and randomly rearrange them
+        let id = "";
+        identifier.forEach(x => id += identifier[Math.floor(Math.random() * identifier.length)]);
+
+        //if user enters a single lette, the id will be created using the letter concatenated with a random number
+        if(id.length == 1){
+            id += id.toUpperCase() + Math.floor(Math.random() * 1000);
+        }
+        
+        //a new property is created assigning a unique 'id' to each 'newNote' then pushed to 'dbFile'
+        newNote["id"] = id; 
+        console.log(`Succesfully created your unique id: '${id}'`);
+        dbFile.push(newNote);
+    }
+    assignRandomId();
     res.json(true);
 });
 
